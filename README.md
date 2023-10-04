@@ -6,6 +6,7 @@ This IntelliJ IDEA plugin provides an additional side panel that displays the nu
 - Counts the number of Kotlin classes, including inner classes and objects.
 - Counts the number of Kotlin functions, including top-level functions and member functions.
 - Provides a "refresh" button to update the count.
+##
 ![Screenshot of the plugin](./assets/screenshot.jpg)
 ## Structure 
 - Main logic is located in ```MyProjectService.kt```
