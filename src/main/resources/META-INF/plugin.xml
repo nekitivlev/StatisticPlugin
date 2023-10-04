@@ -5,14 +5,15 @@
     <vendor>nekitivlev</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow factoryClass="com.github.nekitivlev.statisticplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <toolWindow factoryClass="com.github.nekitivlev.statisticplugin.toolWindow.MyToolWindowFactory" id="Statistic Plugin"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.nekitivlev.statisticplugin.listeners.MyApplicationActivationListener" topic="com.intellij.openapi.application.ApplicationActivationListener"/>
+        <listener class="com.github.nekitivlev.statisticplugin.listeners.MyFrameStateListener" topic="com.intellij.ide.FrameStateListener"/>
     </applicationListeners>
 </idea-plugin>

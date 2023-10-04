@@ -1,45 +1,70 @@
 package com.github.nekitivlev.statisticplugin.toolWindow
 
+import com.github.nekitivlev.statisticplugin.services.MyProjectService
 import com.intellij.openapi.components.service
-import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
-import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPanel
+import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.content.ContentFactory
-import com.github.nekitivlev.statisticplugin.MyBundle
-import com.github.nekitivlev.statisticplugin.services.MyProjectService
+import com.intellij.util.ui.JBUI
+import java.awt.BorderLayout
+import java.awt.Dimension
 import javax.swing.JButton
-
+import javax.swing.JTable
+import javax.swing.table.DefaultTableModel
 
 class MyToolWindowFactory : ToolWindowFactory {
-
-    init {
-        thisLogger().warn("Don't forget to remove all non-needed sample code files with their corresponding registration entries in `plugin.xml`.")
-    }
+    private val contentFactory = ContentFactory.getInstance()
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
         val myToolWindow = MyToolWindow(toolWindow)
-        val content = ContentFactory.getInstance().createContent(myToolWindow.getContent(), null, false)
+        val content = contentFactory.createContent(myToolWindow.getContent(), null, false)
         toolWindow.contentManager.addContent(content)
     }
 
     override fun shouldBeAvailable(project: Project) = true
 
-    class MyToolWindow(toolWindow: ToolWindow) {
-
+    inner class MyToolWindow(toolWindow: ToolWindow){
+        private val tableModel: DefaultTableModel = DefaultTableModel()
         private val service = toolWindow.project.service<MyProjectService>()
 
-        fun getContent() = JBPanel<JBPanel<*>>().apply {
-            val label = JBLabel(MyBundle.message("randomLabel", "?"))
-
-            add(label)
-            add(JButton(MyBundle.message("shuffle")).apply {
-                addActionListener {
-                    label.text = MyBundle.message("randomLabel", service.getRandomNumber())
-                }
-            })
+        init {
+            tableModel.addColumn("File Name")
+            tableModel.addColumn("Classes")
+            tableModel.addColumn("Functions")
         }
+        private fun refreshData() {
+            tableModel.rowCount = 0
+            val psiInfo = service.getPsiInfo()
+            psiInfo.forEach {
+                tableModel.addRow(arrayOf(it.fileName, it.classes, it.functions))
+            }
+        }
+
+        fun getContent() = JBPanel<JBPanel<*>>().apply {
+            layout = BorderLayout()
+            val table = JTable(tableModel)
+            table.fillsViewportHeight = true
+            val scrollPane = JBScrollPane(table)
+            add(scrollPane, BorderLayout.CENTER)
+            val refreshButton = JButton("Refresh").apply {
+                maximumSize = Dimension(Int.MAX_VALUE, preferredSize.height)  // Make the button full width
+                margin = JBUI.insets(5, 15)
+                addActionListener {
+                    refreshData()
+                }
+            }
+            val buttonPanel = JBPanel<JBPanel<*>>().apply {
+                layout = BorderLayout()
+                add(refreshButton, BorderLayout.CENTER)
+            }
+            add(buttonPanel, BorderLayout.SOUTH)
+            refreshData()
+        }
+
+
     }
+
 }
